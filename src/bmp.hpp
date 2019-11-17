@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <stdexcept>
+#include <unistd.h>
 
 #pragma pack(push, 1)
 
@@ -59,25 +60,19 @@ struct BMP {
 
     }
 
-    void write(const char *fname) {
+    void writeToFD(int fd) {
 
-        std::ofstream of{ fname, std::ios_base::binary };
-
-        if (of) {
-            if (info_header.width % 4 == 0) {
-                write_headers_and_data(of);
-            } else {
-                uint32_t new_stride = make_stride_aligned(4);
-                std::vector<uint8_t> padding_row(new_stride - row_stride);
-                write_headers(of);
-
-                for (int y = 0; y < info_header.height; ++y) {
-                    of.write((const char*)(data.data() + row_stride * y), row_stride);
-                    of.write((const char*)padding_row.data(), padding_row.size());
-                }
-            }
+        if (info_header.width % 4 == 0) {
+            write_headers_and_data(fd);
         } else {
-            throw std::runtime_error("Unable to open the output image file.");
+            uint32_t new_stride = make_stride_aligned(4);
+            std::vector<uint8_t> padding_row(new_stride - row_stride);
+            write_headers(fd);
+
+            for (int y = 0; y < info_header.height; ++y) {
+                write(fd, (const char*)(data.data() + row_stride * y), row_stride);
+                write(fd, (const char*)padding_row.data(), padding_row.size());
+            }
         }
     }
 
@@ -120,14 +115,14 @@ struct BMP {
             return new_stride;
         }
 
-        void write_headers(std::ofstream &of) {
-            of.write((const char*)&file_header, sizeof(file_header));
-            of.write((const char*)&info_header, sizeof(info_header));
+        void write_headers(int fd) {
+            write(fd, (const void*)&file_header, sizeof(file_header));
+            write(fd, (const void*)&info_header, sizeof(info_header));
         }
 
-        void write_headers_and_data(std::ofstream &of) {
-            write_headers(of);
-            of.write((const char*)data.data(), data.size());
+        void write_headers_and_data(int fd) {
+            write_headers(fd);
+            write(fd, (const void*) data.data(), data.size());
         }
 
 };
