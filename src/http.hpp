@@ -16,6 +16,8 @@
 
 #include "pad.hpp"
 
+#define GAME_PAGE "<head><title>Snake over http</title><style> body { background-color: black; }  </style> </head> <body><img/> <script type=\"text/javascript\"> var dpad = {};	dpad.stateIdle 			= 0;	dpad.stateKeyDown 		= 1;	dpad.stateKeyPressed	= 2;	dpad.stateKeyUp 		= 3;	dpad.keys = {		up:{			state: 0,			next: 0,			dirty: false,			bindingCode: 87		},		down:{			state: 0,			next: 0,			dirty: false,			bindingCode: 83		},		left:{			state: 0,			next: 0,			dirty: false,			bindingCode: 65		},		right:{			state: 0,			next: 0,			dirty: false,			bindingCode: 68		}	};	dpad.update = function () {				for(var aKeyTag in dpad.keys){						var aKey = dpad.keys[aKeyTag];						if(aKey.state == dpad.stateKeyUp && !aKey.next){				aKey.state = dpad.stateIdle;			}else if(aKey.state == dpad.stateKeyDown && !aKey.next){				aKey.state = dpad.stateKeyPressed;			}else{				if(aKey.next){					aKey.state = aKey.next;				}			}						aKey.next 	= null;			aKey.dirty = false;		}	};	dpad.setup = function(){		document.onkeydown 	= dpad.keyDown;		document.onkeyup 	= dpad.keyUp;	};	dpad.keyDown = function () {		dpad.processKeyEvent(\"down\");	};	dpad.keyUp = function () {		dpad.processKeyEvent(\"up\");	};	dpad.processKeyEvent = function (type){				var x = null;		if(window.event) x = event.keyCode;		else if(event.which) x = event.which;				for(var aKeyTag in dpad.keys){					var aKey =  dpad.keys[aKeyTag];			if(aKey.bindingCode == x){				if(!aKey.dirty){					aKey.dirty = true;										if(aKey.state == dpad.stateIdle){						if(type == \"down\"){							aKey.next = dpad.stateKeyDown;							}					}else if (aKey.state == dpad.stateKeyDown) {						if(type == \"down\"){							aKey.next = dpad.stateKeyPressed;							}else if(type == \"up\"){							aKey.next = dpad.stateKeyUp;						}								}else if (aKey.state == dpad.stateKeyPressed) {						if(type == \"up\"){							aKey.next = dpad.stateKeyUp;							}								}				}else{					if(type == \"up\"){						aKey.next = dpad.stateKeyUp;					}				}			}		}			};	var image = document.images[0];	var downloadingImage = new Image();	var frame = 0;	downloadingImage.onload = function(){    	image.src = this.src;    	window.requestAnimationFrame(doFrame);	};	downloadingImage.onerror = function(){    	window.requestAnimationFrame(doFrame);	};	function doFrame(time){		if (frame++ % 2 == 0 ) {			dpad.update();			downloadingImage.src = \"http://192.168.15.21:1996/?salt=\" + Date() + \"&wasd=\" 			+ dpad.keys.up.state + \"\"			+ dpad.keys.left.state + \"\"			+ dpad.keys.down.state + \"\"			+ dpad.keys.right.state + \"\";		} else {			window.requestAnimationFrame(doFrame);		}	};	dpad.setup();	window.requestAnimationFrame(doFrame);</script></body></html>"
+
 struct HTTP {
 
 	void (*onRequest)(HTTP*);
@@ -81,11 +83,16 @@ private:
   				pad.down  = ((unsigned short) *(location + 7)) - 48;
   				pad.right = ((unsigned short) *(location + 8)) - 48;
 
-  				write(clientfd, "HTTP/1.0 200 OK\n\n", 17);
+  				write(clientfd, "HTTP/1.0 200 OK\n", 16);
+  				write(clientfd, "Content-Type: image/bmp\n", 25);
+  				write(clientfd, "Expires: 0\n", 11);
+  				write(clientfd, "Cache-Control: no-cache\n\n", 25);
 				if(onRequest != NULL) onRequest(this);
 				
 			} else {
-				write(clientfd, "HTTP/1.0 400 BAD REQUEST\n\n", 26);
+				write(clientfd, "HTTP/1.1 200 OK\n", 16);
+				write(clientfd, "Content-Type: text/html;\n\n", 27);
+				write(clientfd, GAME_PAGE, sizeof(GAME_PAGE));
 			}
 		}
 
