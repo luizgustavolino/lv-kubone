@@ -1,26 +1,14 @@
+
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
-
 #include "bmp.hpp"
-#include "notify.hpp"
 #include "http.hpp"
-
-#define IN_PATH  "/var/sim/lv-kubone/runtime/inputmap.txt"
-#define OUT_PATH "/var/sim/lv-kubone/runtime/frame.bmp"
-
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 128;
-
-int  frame = 0;
-char direction;
-int  partSize = 10;
-int  dead  = 0;
-int  speed = 15;
+BMP frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 struct BodyPart {
     BodyPart *next;
@@ -36,7 +24,11 @@ struct Apple{
 BodyPart *head = NULL;
 Apple *apple = NULL;
 
-BMP frame_buffer(SCREEN_WIDTH, SCREEN_HEIGHT);
+int  frame    = 0;
+int  partSize = 10;
+int  dead     = 0;
+int  speed    = 15;
+char direction;
 
 BodyPart* addBodyPart(BodyPart* after, unsigned short x, unsigned short y) {
     head = (BodyPart*) malloc(sizeof(BodyPart));
@@ -187,7 +179,10 @@ void nextFrame(HTTP *server) {
 }
 
 int main(){
+
     onEnter();
+    printf("Welcome to - %s%s%s -\n","\033[92m", "snake over http","\033[0m");
     HTTP http("1996", nextFrame);
+    
     return 0;
 }

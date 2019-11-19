@@ -1,9 +1,13 @@
 
 #pragma once
+
 #include <fstream>
 #include <vector>
 #include <stdexcept>
 #include <unistd.h>
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
 
 #pragma pack(push, 1)
 
