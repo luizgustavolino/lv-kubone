@@ -16,7 +16,7 @@
 
 #include "pad.hpp"
 
-#define GAME_PAGE "<head><title>Snake over http</title><style> body { background-color: black; }  </style> </head> <body><img/> <script type=\"text/javascript\"> var dpad = {};	dpad.stateIdle 			= 0;	dpad.stateKeyDown 		= 1;	dpad.stateKeyPressed	= 2;	dpad.stateKeyUp 		= 3;	dpad.keys = {		up:{			state: 0,			next: 0,			dirty: false,			bindingCode: 87		},		down:{			state: 0,			next: 0,			dirty: false,			bindingCode: 83		},		left:{			state: 0,			next: 0,			dirty: false,			bindingCode: 65		},		right:{			state: 0,			next: 0,			dirty: false,			bindingCode: 68		}	};	dpad.update = function () {				for(var aKeyTag in dpad.keys){						var aKey = dpad.keys[aKeyTag];						if(aKey.state == dpad.stateKeyUp && !aKey.next){				aKey.state = dpad.stateIdle;			}else if(aKey.state == dpad.stateKeyDown && !aKey.next){				aKey.state = dpad.stateKeyPressed;			}else{				if(aKey.next){					aKey.state = aKey.next;				}			}						aKey.next 	= null;			aKey.dirty = false;		}	};	dpad.setup = function(){		document.onkeydown 	= dpad.keyDown;		document.onkeyup 	= dpad.keyUp;	};	dpad.keyDown = function () {		dpad.processKeyEvent(\"down\");	};	dpad.keyUp = function () {		dpad.processKeyEvent(\"up\");	};	dpad.processKeyEvent = function (type){				var x = null;		if(window.event) x = event.keyCode;		else if(event.which) x = event.which;				for(var aKeyTag in dpad.keys){					var aKey =  dpad.keys[aKeyTag];			if(aKey.bindingCode == x){				if(!aKey.dirty){					aKey.dirty = true;										if(aKey.state == dpad.stateIdle){						if(type == \"down\"){							aKey.next = dpad.stateKeyDown;							}					}else if (aKey.state == dpad.stateKeyDown) {						if(type == \"down\"){							aKey.next = dpad.stateKeyPressed;							}else if(type == \"up\"){							aKey.next = dpad.stateKeyUp;						}								}else if (aKey.state == dpad.stateKeyPressed) {						if(type == \"up\"){							aKey.next = dpad.stateKeyUp;							}								}				}else{					if(type == \"up\"){						aKey.next = dpad.stateKeyUp;					}				}			}		}			};	var image = document.images[0];	var downloadingImage = new Image();	var frame = 0;	downloadingImage.onload = function(){    	image.src = this.src;    	window.requestAnimationFrame(doFrame);	};	downloadingImage.onerror = function(){    	window.requestAnimationFrame(doFrame);	};	function doFrame(time){		if (frame++ % 2 == 0 ) {			dpad.update();			downloadingImage.src = \"http://192.168.15.21:1996/?salt=\" + Date() + \"&wasd=\" 			+ dpad.keys.up.state + \"\"			+ dpad.keys.left.state + \"\"			+ dpad.keys.down.state + \"\"			+ dpad.keys.right.state + \"\";		} else {			window.requestAnimationFrame(doFrame);		}	};	dpad.setup();	window.requestAnimationFrame(doFrame);</script></body></html>"
+#define GAME_PAGE "<head><title>Snake over http</title><style> body { background-color: black; }  </style> </head> <body><img/> <script type=\"text/javascript\"> var dpad = {};	dpad.stateIdle 			= 0;	dpad.stateKeyDown 		= 1;	dpad.stateKeyPressed	= 2;	dpad.stateKeyUp 		= 3;	dpad.keys = {		up:{			state: 0,			next: 0,			dirty: false,			bindingCode: 87		},		down:{			state: 0,			next: 0,			dirty: false,			bindingCode: 83		},		left:{			state: 0,			next: 0,			dirty: false,			bindingCode: 65		},		right:{			state: 0,			next: 0,			dirty: false,			bindingCode: 68		}	};	dpad.update = function () {				for(var aKeyTag in dpad.keys){						var aKey = dpad.keys[aKeyTag];						if(aKey.state == dpad.stateKeyUp && !aKey.next){				aKey.state = dpad.stateIdle;			}else if(aKey.state == dpad.stateKeyDown && !aKey.next){				aKey.state = dpad.stateKeyPressed;			}else{				if(aKey.next){					aKey.state = aKey.next;				}			}						aKey.next 	= null;			aKey.dirty = false;		}	};	dpad.setup = function(){		document.onkeydown 	= dpad.keyDown;		document.onkeyup 	= dpad.keyUp;	};	dpad.keyDown = function () {		dpad.processKeyEvent(\"down\");	};	dpad.keyUp = function () {		dpad.processKeyEvent(\"up\");	};	dpad.processKeyEvent = function (type){				var x = null;		if(window.event) x = event.keyCode;		else if(event.which) x = event.which;				for(var aKeyTag in dpad.keys){					var aKey =  dpad.keys[aKeyTag];			if(aKey.bindingCode == x){				if(!aKey.dirty){					aKey.dirty = true;										if(aKey.state == dpad.stateIdle){						if(type == \"down\"){							aKey.next = dpad.stateKeyDown;							}					}else if (aKey.state == dpad.stateKeyDown) {						if(type == \"down\"){							aKey.next = dpad.stateKeyPressed;							}else if(type == \"up\"){							aKey.next = dpad.stateKeyUp;						}								}else if (aKey.state == dpad.stateKeyPressed) {						if(type == \"up\"){							aKey.next = dpad.stateKeyUp;							}								}				}else{					if(type == \"up\"){						aKey.next = dpad.stateKeyUp;					}				}			}		}			};	var image = document.images[0];	var downloadingImage = new Image();	var frame = 0;	downloadingImage.onload = function(){    	image.src = this.src;    	window.requestAnimationFrame(doFrame);	};	downloadingImage.onerror = function(){    	window.requestAnimationFrame(doFrame);	};	function doFrame(time){		if (frame++ % 2 == 0 ) {			dpad.update();			downloadingImage.src = \"/?salt=\" + (new Date().getTime()) + \"&wasd=\" 			+ dpad.keys.up.state + \"\"			+ dpad.keys.left.state + \"\"			+ dpad.keys.down.state + \"\"			+ dpad.keys.right.state + \"\";		} else {			window.requestAnimationFrame(doFrame);		}	};	dpad.setup();	window.requestAnimationFrame(doFrame);</script></body></html>"
 
 struct HTTP {
 
@@ -43,7 +43,7 @@ private:
 			clientfd = accept(listenfd, (struct sockaddr *) &clientaddr, &addrlen);
 
 			if (clientfd < 0){
-				throw std::runtime_error("accept() error");
+				fprintf(stderr, "accept() error. skipping...");
 			} else {
 				respond(0);
 			}
@@ -71,7 +71,7 @@ private:
 		} else {
 
 			// receive message
-			printf("%s\n", msg);
+			// printf("%s\n", msg);
 
 			const char* hint = "wasd=\0";
 			char* location = strstr(msg, hint);
@@ -101,7 +101,7 @@ private:
 		clientfd = -1;
 	}
 
-	bool bindSocket(const char *port){
+	void bindSocket(const char *port){
 
     	struct addrinfo hints, *res, *p; 
 
@@ -112,7 +112,7 @@ private:
    	 	hints.ai_flags 		= AI_PASSIVE;
 
     	if(getaddrinfo( NULL, port, &hints, &res) != 0){
-        	throw std::runtime_error("getaddrinfo() error");
+        	fprintf(stderr, "getaddrinfo() error");
         	exit(1);
    		}
 
@@ -128,7 +128,7 @@ private:
     	}
     
     	if(p == NULL){
-        	throw std::runtime_error("fail to socket or bind");
+        	fprintf(stderr, "fail to socket or bind");
         	exit(1);
     	}
 
@@ -136,10 +136,10 @@ private:
 
     	// listen for incoming connections
     	if( listen (listenfd, 1000000) != 0 ){
-        	throw std::runtime_error("listen error");
+    		fprintf(stderr, "listen error");
         	exit(1);
     	}
 
-    	printf("Simulator server started at %s%s%s%s\n","\033[92m", "localhost:", port ,"\033[0m");
+    	fprintf(stdout, "Simulator server started at %s%s%s%s\n","\033[92m", "localhost:", port ,"\033[0m");
 	}
 };

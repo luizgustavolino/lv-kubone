@@ -30,11 +30,12 @@ int  dead     = 0;
 int  speed    = 15;
 char direction;
 
-BodyPart* addBodyPart(BodyPart* after, unsigned short x, unsigned short y) {
-    head = (BodyPart*) malloc(sizeof(BodyPart));
-    head->next = after;
-    head->x = x;
-    head->y = y;
+BodyPart* addBodyPart(unsigned short x, unsigned short y) {
+    BodyPart* part = (BodyPart*) malloc(sizeof(BodyPart));
+    part->next = NULL;
+    part->x = x;
+    part->y = y;
+    return part;
 }
 
 bool hasBodyAt(int x, int y, BodyPart* start = NULL) {
@@ -92,9 +93,9 @@ void killSnake(){
 void onEnter(){
     direction = 'a';
     speed = 14;
-    head = addBodyPart(NULL, 2, 8);
-    BodyPart *body = addBodyPart(head, 2, 7);
-    BodyPart *tail = addBodyPart(body, 2, 6);
+    head = addBodyPart(2, 8);
+    head->next = addBodyPart(2, 7);
+    head->next->next = addBodyPart(2, 6);
     addRandomApple();
 }
 
@@ -160,13 +161,16 @@ void nextFrame(HTTP *server) {
 
         if (frame % MAX(6, speed) == 0){
 
+            BodyPart *oldHead = head;
             switch (direction) {
-                case 'w': head = addBodyPart(head, head->x, (head->y + 1)%10); break;
-                case 'd': head = addBodyPart(head, (head->x + 1)%10, head->y); break;
-                case 'a': head = addBodyPart(head, head->x > 0 ? head->x - 1 : 9, head->y); break;
-                case 's': head = addBodyPart(head, head->x, head->y > 0 ? head->y - 1 : 9); break;
-                default: break;
+                case 'w': head = addBodyPart(head->x, (head->y + 1)%10); break;
+                case 'd': head = addBodyPart((head->x + 1)%10, head->y); break;
+                case 'a': head = addBodyPart(head->x > 0 ? head->x - 1 : 9, head->y); break;
+                case 's': head = addBodyPart(head->x, head->y > 0 ? head->y - 1 : 9); break;
+                default: oldHead = NULL;
             }
+
+            if (oldHead != NULL) head->next = oldHead; 
 
             if (hasBodyAt(head->x, head->y, head->next)) dead = 180;
             else if (apple == NULL) addRandomApple();
@@ -181,7 +185,7 @@ void nextFrame(HTTP *server) {
 int main(){
 
     onEnter();
-    printf("Welcome to - %s%s%s -\n","\033[92m", "snake over http","\033[0m");
+    fprintf(stdout, "- %s%s%s -\n","\033[92m", "snake over http","\033[0m");
     HTTP http("1996", nextFrame);
     
     return 0;
