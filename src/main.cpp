@@ -185,8 +185,7 @@ void nextFrame(HTTP *server) {
 int main(){
 
     onEnter();
-    fprintf(stdout, "- %s%s%s -\n","\033[92m", "snake over http","\033[0m");
+    fprintf(stdout, "- %s%s%s -\n","\033[92m", "snake over http 2","\033[0m");
     HTTP http("1996", nextFrame);
-    
     return 0;
 }

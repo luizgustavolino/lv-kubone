@@ -26,8 +26,9 @@ struct HTTP {
 
 	HTTP(const char *port, void (*_onRequest)(HTTP*)) {
 		onRequest = _onRequest;
-		bindSocket(port);
-		acceptFoverer();
+		if (bindSocket(port)){
+			acceptFoverer();
+		}
 	}
 
 private:
@@ -38,12 +39,13 @@ private:
 
 	void acceptFoverer(){
 		while(true) {
-
+			
 			addrlen = sizeof(clientaddr);
 			clientfd = accept(listenfd, (struct sockaddr *) &clientaddr, &addrlen);
 
 			if (clientfd < 0){
-				fprintf(stderr, "accept() error. skipping...");
+				fprintf(stdout, "accept() error. skipping...");
+				fflush(stdout);
 			} else {
 				respond(0);
 			}
@@ -61,12 +63,16 @@ private:
 		if (rcvd < 0) {
 
 			// receive error
-			fprintf(stderr, ("Erro on recv().\n"));
+			printf("2\n");
+			fprintf(stdout, ("Erro on recv().\n"));
+			fflush(stdout);
 
 		} else if (rcvd == 0) {
 
 			// receive socket closed
-			fprintf(stderr, "Client disconnected upexpectedly.\n");
+			printf("1\n");
+			fprintf(stdout, "Client disconnected upexpectedly.\n");
+			fflush(stdout);
 
 		} else {
 
@@ -83,8 +89,8 @@ private:
   				pad.down  = ((unsigned short) *(location + 7)) - 48;
   				pad.right = ((unsigned short) *(location + 8)) - 48;
 
-  				write(clientfd, "HTTP/1.0 200 OK\n", 16);
-  				write(clientfd, "Content-Type: image/bmp\n", 25);
+  				write(clientfd, "HTTP/1.1 200 OK\n", 16);
+  				write(clientfd, "Content-Type: image/bmp\n", 24);
   				write(clientfd, "Expires: 0\n", 11);
   				write(clientfd, "Cache-Control: no-cache\n\n", 25);
 				if(onRequest != NULL) onRequest(this);
@@ -101,7 +107,7 @@ private:
 		clientfd = -1;
 	}
 
-	void bindSocket(const char *port){
+	bool bindSocket(const char *port){
 
     	struct addrinfo hints, *res, *p; 
 
@@ -112,8 +118,9 @@ private:
    	 	hints.ai_flags 		= AI_PASSIVE;
 
     	if(getaddrinfo( NULL, port, &hints, &res) != 0){
-        	fprintf(stderr, "getaddrinfo() error");
-        	exit(1);
+        	fprintf(stdout, "getaddrinfo() error");
+        	fflush(stdout);
+        	return false;
    		}
 
     	// socket and bind
@@ -128,18 +135,22 @@ private:
     	}
     
     	if(p == NULL){
-        	fprintf(stderr, "fail to socket or bind");
-        	exit(1);
+        	fprintf(stdout, "fail to socket or bind");
+        	fflush(stdout);
+        	return false;
     	}
 
     	freeaddrinfo(res);
 
     	// listen for incoming connections
     	if( listen (listenfd, 1000000) != 0 ){
-    		fprintf(stderr, "listen error");
-        	exit(1);
+    		fprintf(stdout, "listen error");
+    		fflush(stdout);	
+    		return false;
     	}
 
     	fprintf(stdout, "Simulator server started at %s%s%s%s\n","\033[92m", "localhost:", port ,"\033[0m");
+		fflush(stdout);
+		return true;
 	}
 };
